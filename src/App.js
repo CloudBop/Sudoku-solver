@@ -50,6 +50,26 @@ class App extends Component {
     } 
   }
 
+  whenUserInserted=(id,value)=>{
+    this.changeCellValueById(id,value)
+  }
+
+  changeCellValueById = (id, val) => {
+    // 
+    let indexNum = (parseInt(id[0]) - 1) * 9 + parseInt(id[1]) - 1;
+    let newCellValues = [...this.state.cellValues];
+    newCellValues[indexNum] = val;
+
+    if(parseInt(val)>0 && 10 > parseInt(val)) {
+      this.setState({ cellValues: newCellValues });
+    } else {
+      // don't do anything
+    }
+
+  };
+
+  
+
   loadAnewGame = () => {
     let gameObj = this.NewGame.getFirstValue();
     let level = gameObj.level ; 
@@ -107,6 +127,7 @@ class App extends Component {
         str = str + ";"
       }
     });
+    
     this.setState( { messageBoxBelow : str });
   }
 
@@ -116,6 +137,7 @@ class App extends Component {
 
   handleChange = e => {
     console.log("handleChange e  : ", e);
+    this.whenUserInserted(e.target.id, e.target.value)
   };
 
   handleFocus = e => {

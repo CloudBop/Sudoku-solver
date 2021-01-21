@@ -41,7 +41,9 @@
  
  .bg-coral {
  background-color: coral !important ;
-  
+ }
+ .bg-blue {
+ background-color: #00aabb !important ;
  }
 
 
