@@ -96,8 +96,39 @@ class App extends Component {
         }
       }
     });
-
     this.setState({ cellsBackgroundColors: [...colorCells]   });
+  };
+
+  /**
+   * shows Cell Info row number and column number and available candidates to be put.
+   *
+   * @function showCellInfo
+   * @param {string} id this is the cell id
+   * @param {number} value value between 1-9 or empty
+   */
+  showCellInfo = (id, value) => {
+    /* First lets check if the cell is already filled  */
+    if (parseInt(value) > 0) {
+      this.sendConsole(
+        `this one is filled { Row : ${id[0]}, Column :${id[1]} }, [${value}]`
+      );
+      return;
+    }
+
+    let squaresInfo = this.newEngine.whichValuesById(this.state.cellValues, id);
+
+    this.sendConsole(
+      `{ Row : ${id[0]}, Column :${id[1]} }, [${squaresInfo.toString()}]`
+    );
+
+    // if (squaresInfo[0] === "filled") {
+    // } else {
+    //   if (squaresInfo.length === 1) {
+    //     this.notify(
+    //       "Bingooo, we can write here: (" + id + ") : " + squaresInfo.toString()
+    //     );
+    //   }
+    // }
   };
 
   
@@ -175,11 +206,10 @@ class App extends Component {
   handleFocus = e => {
     // console.log("handleFocus e  : ", e);
 
-    const id = e.target.id
-    const value = e.target.value
+    const id = e.target.id;
+    const value = e.target.value;
     this.colorConnectedCells(id, 'coral');
-
-    // this.showCellInfo
+    this.showCellInfo(id, value);
   };
 
   //
@@ -189,10 +219,9 @@ class App extends Component {
     console.log(" handleShowFound ");
   }
 
-  sendConsole=() =>{
-    console.log(" sendConsole ");
-  }
-
+  sendConsole = str => {
+    this.setState({ consoleMessage: str });
+  };
 
   componentDidMount() {
     this.loadAnewGame();
