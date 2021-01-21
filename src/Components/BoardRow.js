@@ -70,6 +70,7 @@ const BoardRow = props => {
               onChange={handleChange}
               onFocus={handleFocus}
               value={value}
+              autoComplete={"off"}
             />
           </td>
         );

@@ -9,10 +9,12 @@ import Board from './Components/Board';
 import GameInfo from './Components/GameInfo';
 import ConsoleRight from './Components/ConsoleRight';
 import NewGame from "./Controls/NewGame";
+import NewEngine from "./Controls/NewEngine";
 class App extends Component {
   constructor(props) {
     super(props);
     this.NewGame = new NewGame();
+    this.newEngine = new NewEngine();
     this.state = {
       cellValues: new Array(81).fill("2"),
       cellsBackgroundColors: new Array(81).fill("bg-white") ,
@@ -66,6 +68,36 @@ class App extends Component {
       // don't do anything
     }
 
+  };
+
+  colorConnectedCells = (id, color) => {
+    let index = this.newEngine.convertIdToIndex(id);
+
+    //it creates default colors white again
+    let colorCells = new Array(81).fill("bg-white"); //  [...this.state.cellsBackgroundColors];
+    //
+    let row = parseInt(id[0]);
+    let column = parseInt(id[1]);
+    // what quadrant is it in?
+    let cube = this.newEngine.getCubeIndex(row, column);
+    // 
+    let allCells = this.newEngine.getAllCellsInfo(this.state.cellValues);
+    let count = -1;
+    allCells.map(cell => {
+      count++;
+      // is aligned row, col or in quadrant
+      if ( cell.row === row || cell.column === column || cell.cube === cube) {
+        //
+        if (cell.row === row && cell.column === column && cell.cube === cube) {
+          // we found our current Cell 
+          colorCells[count] = "bg-blue";
+        } else {
+          colorCells[count] = "bg-" + color;
+        }
+      }
+    });
+
+    this.setState({ cellsBackgroundColors: [...colorCells]   });
   };
 
   
@@ -141,7 +173,13 @@ class App extends Component {
   };
 
   handleFocus = e => {
-    console.log("handleFocus e  : ", e);
+    // console.log("handleFocus e  : ", e);
+
+    const id = e.target.id
+    const value = e.target.value
+    this.colorConnectedCells(id, 'coral');
+
+    // this.showCellInfo
   };
 
   //
