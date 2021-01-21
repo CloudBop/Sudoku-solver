@@ -57,6 +57,7 @@ class NewGame{
         level = "hard";
         gameObj = { id: id, str: st, level: level };
         stArr.push(gameObj);
+        // select game @ random 
         return _.sample(stArr);
       }
 }
