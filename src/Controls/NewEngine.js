@@ -9,8 +9,7 @@ class newE {
   /**
    *  Engine functions to handle sudoku game
    */
-
-  constructor() {}
+  // constructor() {}
 
   getCubeIndex(row, column) {
     //
@@ -110,6 +109,145 @@ class newE {
    // console.log(  "knownValuesObj" ,knownValuesObj) ;
    // console.log(  "knownValues" ,knownValues) ;
     return { knownValues, knownValuesObj };
+  }
+
+  //  
+  goNext(id, cellValues) {
+    // console.log("go next was called ", id, cellValues);
+    // "11"  ,  "12" 
+    let index = parseInt(this.convertIdToIndex(id)); //  0 , 1   
+    // console.log("this should give index of the current cell", index);
+    let nextIndex = this.getNextEmpty(index, cellValues);
+    let idObj  = this.convertIndexToId(nextIndex);
+    // console.log("find next index( +1 )", idObj );
+    id = idObj.row.toString() + idObj.column.toString();
+    //id = nextIndex
+    // console.log("this should be next available empty cell id", id);
+    return id;
+  }
+  getNextEmpty(index, cellValues) {
+    //
+    index++ ;
+    let count = -1;
+    let IndexToReturn = null;
+    if (index > 80) {
+       index = 0 ; 
+    }
+
+    let allCells = this.getAllCellsInfo(cellValues);
+    // console.log("id, allCells", index, allCells);
+    allCells.map(element => {
+      count++;
+      if (count === index) {
+        if (parseInt(element.value) === 0) {
+          console.log("this is allcells", allCells);
+          console.log(
+            "this should be next empty cell value  " , element.value, "and index of it  ", count 
+ 
+          );
+          IndexToReturn = index;
+        } else {
+          IndexToReturn = false;
+        }
+      }
+    });
+    // 
+    if (IndexToReturn === false) {
+      console.log(
+        "let us check the next one " , index ) ; 
+      return this.getNextEmpty(index, cellValues);
+    }
+    // 
+    return IndexToReturn;
+  }
+  errorCells(cellValues, id, value) {
+    // id ="25" 
+    let row = parseInt(id[0]);
+    let column = parseInt(id[1]);
+    let cube = this.getCubeIndex(row, column);
+    let errorCellsIdArray = [];
+    let allCells = this.getAllCellsInfo(cellValues);
+    /* We get known numbers that restricts this Cell. We can not put those values  */
+    let known = this.getKnownValues(allCells, row, column, cube);
+    // console.log("know gets this " ,  known );
+    let knownValuesObj = known.knownValuesObj;
+
+    knownValuesObj.map(elem => {
+      if (elem.v === parseInt(value)) {
+        let id1 = elem.r;
+        let id2 = elem.c;
+        let nid = id1.toString() + id2.toString();
+        errorCellsIdArray.push(nid);
+      }
+    });
+    //  console.log("known o", known.knownValuesObj);
+    return errorCellsIdArray;
+  }
+  canWePutThis(cellValues, id, value) {
+    //
+    let candidates = this.whichValuesById(cellValues, id);
+    // console.log("canWe arr ", arr);
+    // [ 3 , 6 , 8 ] 
+    if (candidates.indexOf(parseInt(value)) > -1) {
+      return true;
+    } else {
+      // invalid state
+      return false;
+    }
+  }
+
+  checkTheGame(cellValues) {
+    let gameInfo = {};
+    let complexity = 1;
+    let complexityLog;
+
+    let countFilledCells = 0;
+    let emptyCount = 0;
+
+    /* iterates all cells and gets candidates for empty cells 
+    and return array of object allCells   */
+
+    /*
+                   allCells
+                      2: {row: 1, column: 3, value: 1}
+                      3: {row: 1, column: 4, value: 0}
+                      */
+    let allCells = [...this.getAllCellsInfo(cellValues)];
+
+    allCells.map(elem => {
+      if (parseInt(elem.value) > 0) {
+        countFilledCells++;
+      } else {
+        emptyCount++;
+
+        let cands = this.whichValuesByRowColumnCube(
+          cellValues,
+          elem.row,
+          elem.column,
+          elem.cube
+        );
+        // console.log("cands", cands);
+        elem.cands = [...cands];
+
+        complexity = complexity * cands.length;
+      }
+    });
+
+    complexityLog = this.getBaseLog(10, complexity);
+
+    gameInfo = {
+      cells: allCells,
+      complexity,
+      emptyCount,
+      countFilledCells,
+      complexityLog
+    };
+    //console.log( "gameInfo" , gameInfo ) ;
+    return gameInfo;
+  }
+
+  getBaseLog(x, y) {
+    return Math.log(y) / Math.log(x);
   }
 }
 
