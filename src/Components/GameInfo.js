@@ -2,7 +2,7 @@ import React  from "react";
 
 
 const GameInfo = (props) => {
- const {gameLevel  ,countEmptyCells ,complexityLevel ,complexityLog  } = props ; 
+ const {gameLevel  ,countEmptyCells ,complexityLevel ,complexityLog, gameId  } = props ; 
 
  const cName =  ( gameLevel === "hard")? "danger" :  ( gameLevel === "easy") ? "success" : "warning"   ;
 
@@ -28,6 +28,13 @@ const GameInfo = (props) => {
             </span>
           </p>
         </div>
+
+        <a className="panel-block is-active">
+          <span className="panel-icon">
+            <i className="fas fa-book" aria-hidden="true"></i>
+          </span>
+          <span className={"tag is-large" }>  Id : {gameId }   </span>
+        </a>
   
         <a className="panel-block is-active">
           <span className="panel-icon">
