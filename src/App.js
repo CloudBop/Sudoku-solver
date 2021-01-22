@@ -570,6 +570,8 @@ class App extends Component {
                   handleFocus={this.handleFocus}
                   cellValues={this.state.cellValues}
                   cellsBackgroundColors={this.state.cellsBackgroundColors}
+                  popupCells={this.state.popupCells}
+                  popupCellsMessage={this.state.popupCellsMessage}
                   />
                 </div>              
                 <div className="column">  

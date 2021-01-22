@@ -6,11 +6,13 @@ const Board = props => {
     handleChange,
     handleFocus,
     cellValues,
-    cellsBackgroundColors
+    cellsBackgroundColors,
+    popupCells,
+    popupCellsMessage
   } = props;
 
   const simple9 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
+  // console.log('msg', msg)
   return (
     <div className="container">
       <hr />
@@ -26,7 +28,8 @@ const Board = props => {
                       handleFocus={handleFocus}
                       cellValues = {cellValues}
                       cellsBackgroundColors={ cellsBackgroundColors}
-
+                      popupCells={popupCells}
+                      popupCellsMessage={popupCellsMessage}
                       id={elem.toString()} 
                     />
                   );
@@ -36,6 +39,7 @@ const Board = props => {
         </table>
       </div>
       <hr />
+      <span className={"message2 popup2"}>{popupCellsMessage.filter(cell=>cell!=="")}</span> 
     </div>
   );
 };
