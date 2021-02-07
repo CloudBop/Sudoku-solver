@@ -265,6 +265,82 @@ class newE {
     });
     return foundCells;
   }
+
+  //
+  // secondSolve
+  //
+  secondSolve(cellValues) {
+    let gameInfo = this.checkTheGame(cellValues)
+    //
+    let allCellsWithCandidates = gameInfo.cells
+    //
+    let foundCells = [];
+    let refs=["cube", "row", "column"]
+
+    // 2d loop
+    refs.map(ref=>{
+      let simple9 = [1,2,3,4,5,6,7,8,9];
+
+      simple9.map(num=>{
+        let res = this.checkCandsDynamic(ref, num, allCellsWithCandidates);
+
+        if(res.length>0) {
+          foundCells = foundCells.concat(res)
+        }
+      })
+    })
+
+    return foundCells;
+  }
+
+  checkCandsDynamic(ref, refValue, allCellsWithCandidates) {
+    // ref=== row | column | cube
+    // track times seen
+              // 1,2,3,4,5,6,7,8,9
+    let count = [0,0,0,0,0,0,0,0,0]
+
+    let storeObjArray=[];
+    let foundCellsObjArr = [];
+    allCellsWithCandidates.map(elem=>{
+
+      // we are checking certain elem.cube, elem.row or elem.col
+      if(elem[ref]=== refValue && elem.cands !== undefined) {
+        
+        elem.cands.map(candidate=>{
+          // in empty cell
+          // count number of times seen within cells Row, Col or Cube
+          count[candidate-1] = count[candidate-1]+1;
+          storeObjArray[candidate-1]=elem
+        })
+      }
+    })
+
+    // now have an array of numbs, each count occurnce of candidate
+    //  1 2 3 4 5 6 7
+    // [0,0,2,3,4,5,1,2,3]
+    // can place the 7
+
+    let numb = -1;
+    count.map(el=>{
+      numb++
+
+      if(el===1){
+        if(storeObjArray[numb]) {
+          let obj = {
+            value: numb+1,
+            detail: storeObjArray[numb],
+            using: ref
+          }
+          //
+          foundCellsObjArr.push(obj);
+        }
+      }
+    })
+    
+    
+    return [ ...foundCellsObjArr];
+
+  }
 }
 
 export default newE;

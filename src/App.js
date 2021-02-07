@@ -328,6 +328,12 @@ class App extends Component {
   };
 
   changeCellValueById = (id, val) => {
+    // change bgc of cell for second
+    let idArr = [];
+    idArr.push( id )
+    this.colorThese("blue", idArr);
+
+    // 
     this.notify("{ id : " + id + ", value : " + val + "} ");
     let index = (parseInt(id[0]) - 1) * 9 + parseInt(id[1]) - 1;
     let newCellValues = [...this.state.cellValues];
@@ -449,24 +455,44 @@ class App extends Component {
     // console.log('Solver-started')
     this.solve()
   }
-
+  
   solve = (e) => {
+    
+    if(this.getGameInfo()===false){
+      return false;
+    }
+    
     // algo1 only one candidate to place
     let foundCells = this.newEngine.firstSolve(this.state.cellValues)
     foundCells.map(elem=>{
       let idx1 = elem.row;
       let idx2 = elem.column;
-
+  
       let id = idx1.toString()+idx2.toString();
       let value= elem.cands[0];
-
+  
       this.changeCellValueById(id, value);
     })
-    if(foundCells.length>0) {
+    
+    // algo2, loop through cell area, column, row, square, and look for a single candidate version.
+    let foundCellsSecond = this.newEngine.secondSolve(this.state.cellValues)
+    console.log("🚀 ~ file: App.js ~ line 461 ~ App ~ foundCells", foundCellsSecond)
+
+    foundCellsSecond.map(found => {
+      let id = found.detail.row.toString() + found.detail.column.toString();
+      let val = found.value;
+      
+      setTimeout(()=>{
+        this.changeCellValueById(id, val)
+      });
+  
+    })
+    
+    if(foundCells.length>0 || foundCellsSecond.length>0) {
       setTimeout(()=>this.solve(e),500);
     }
 
-    
+
     // let newcellsBackgroundColors = [...this.state.cellsBackgroundColors];
     // newcellsBackgroundColors[ 0 ] = "bg-coral";
 
