@@ -445,17 +445,37 @@ class App extends Component {
     this.setState({messageBoxBelow: face})
   };
 
-  solve = () => {
+  solveHandler = () => {
+    // console.log('Solver-started')
+    this.solve()
+  }
+
+  solve = (e) => {
+    // algo1 only one candidate to place
+    let foundCells = this.newEngine.firstSolve(this.state.cellValues)
+    foundCells.map(elem=>{
+      let idx1 = elem.row;
+      let idx2 = elem.column;
+
+      let id = idx1.toString()+idx2.toString();
+      let value= elem.cands[0];
+
+      this.changeCellValueById(id, value);
+    })
+    if(foundCells.length>0) {
+      setTimeout(()=>this.solve(e),500);
+    }
+
     
-    let newcellsBackgroundColors = [...this.state.cellsBackgroundColors];
-    newcellsBackgroundColors[ 0 ] = "bg-coral";
+    // let newcellsBackgroundColors = [...this.state.cellsBackgroundColors];
+    // newcellsBackgroundColors[ 0 ] = "bg-coral";
 
-    console.log(  "cellsBackgroundColors earlier" ,  this.state.cellsBackgroundColors  ) ; 
+    // console.log(  "cellsBackgroundColors earlier" ,  this.state.cellsBackgroundColors  ) ; 
 
-    this.setState( { cellsBackgroundColors:[...newcellsBackgroundColors]  } );
-    setTimeout(() => {
-      console.log(  "cellsBackgroundColors later" , this.state.cellsBackgroundColors  ) ; 
-    },  300 );
+    // this.setState( { cellsBackgroundColors:[...newcellsBackgroundColors]  } );
+    // setTimeout(() => {
+    //   console.log(  "cellsBackgroundColors later" , this.state.cellsBackgroundColors  ) ; 
+    // },  300 );
   };
 
   stop = () => {

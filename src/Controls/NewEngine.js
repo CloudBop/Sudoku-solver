@@ -249,6 +249,22 @@ class newE {
   getBaseLog(x, y) {
     return Math.log(y) / Math.log(x);
   }
+
+  //
+  // first solve
+  //
+  firstSolve(cellValues) {
+    let gameInfo = this.checkTheGame(cellValues);
+    let allCellsWithCandidates = gameInfo.cells;
+    let foundCells = [];
+
+    allCellsWithCandidates.map(elem=> {
+      if(elem.cands !== undefined && elem.cands.length===1) { 
+        foundCells.push(elem)
+      }
+    });
+    return foundCells;
+  }
 }
 
 export default newE;
