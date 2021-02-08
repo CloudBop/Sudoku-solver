@@ -42,13 +42,11 @@ class App extends Component {
   }
 
   gameInit = e => {
-    console.log("game init...");
-
-    this.getGameInfo();
-
+    // console.log("game init...");
+    this.setState({ stop: false });
     this.setState({ maxIteration: this.state.firstMaxIteration });
-    const filledArray = new Array(81).fill("");
     
+    const filledArray = new Array(81).fill("");
     this.setState({ numberOfSolved: 0 });
     this.setState({ cellValues: filledArray });
 
@@ -59,8 +57,7 @@ class App extends Component {
     this.setState({ popupCellsMessage: popArrayMessage });
 
     this.setState({ stepsArchive: [] });
-    document.getElementById("messageBoxBelow").style.backgroundColor =
-      "#FFffff";
+    document.getElementById("messageBoxBelow").style.backgroundColor = "#FFffff";
   };
 
   getGameInfo = e => {
@@ -79,16 +76,16 @@ class App extends Component {
     let info = this.newEngine.checkTheGame(this.state.cellValues);
     
     setTimeout(() => {
-    console.log("🚀 ~ file: App.js ~ line 82 ~ App ~ this.state.cellValues", this.state.cellValues)
+      // console.log("🚀 ~ file: App.js ~ line 82 ~ App ~ this.state.cellValues", this.state.cellValues)
       this.setState({ complexityLevel: info.complexity });
       this.setState({ countEmptyCells: info.emptyCount });
       this.setState({ countFilledCells: info.countFilledCells });
       this.setState({ complexityLog: info.complexityLog });
-      console.log('info', info)
+      // console.log('info', info)
       if (info.emptyCount === 0) {
         this.setState({ stateOfGame: "solved" });
         // here we can add extra control
-        console.log("I am getting empty cells ... emptyCount", info.emptyCount);
+        // console.log("I am getting empty cells ... emptyCount", info.emptyCount);
         this.yayFinishedTheGame(e);
         return false;
       }
@@ -126,32 +123,27 @@ class App extends Component {
     //  Engine.loadStr(st);
 
     let arr = this.stringToCellValuesArray(st);
-
+    // 
     this.setState({ gameLoadedFirst: arr });
     this.setState({ cellValues: arr });
+    this.setState({ stateOfGame: "active" });
 
+
+    // TODO - NOT CURRENTLY IN IMPLMNTD IN UI
     // in order to move back and forward in our steps
     const _stepsArchive = [...this.state.stepsArchive];
     let nObj = { v: arr };
     _stepsArchive.push(nObj);
     this.setState({ stepsArchive: _stepsArchive });
-
-    console.log("first values were added to archive", _stepsArchive);
-
+    // console.log("first values were added to archive", _stepsArchive);
     const level = gameObj.level;
-
     // face expressions for funface
-
     const face = this.faceExpression(level);
     this.setState({ messageBoxBelow: face });
-
     // store info for the loaded game for later use
     this.setState({ gameId: gameObj.id });
-
     this.setState({ gameLevel: level });
     this.setState({ gameStr: st });
-
-    this.getGameInfo();
   };
 
   allhide = () => {
@@ -374,7 +366,7 @@ class App extends Component {
       return;
     }
 
-    let index = this.newEngine.convertIdToIndex(id);
+    // let index = this.newEngine.convertIdToIndex(id);
 
     //it creates default colors white again
     let colorCells = new Array(81).fill("bg-white"); //  [...this.state.cellsBackgroundColors];
@@ -665,14 +657,15 @@ class App extends Component {
 
   componentDidMount() {
     console.log("componentDidMount ");
-    this.setState({ stop: false });
-    this.setState({ stateOfGame: "active" });
-
+    
     this.colorFirst();
     setTimeout(() => {
+      // initital basecase of state to manage
       this.gameInit();
-      // this.loadARandomGame();
-      // this.getGameInfo();
+      // load up game state and derive specs
+      this.loadARandomGame();
+      //
+      this.getGameInfo();
     }, 300);
   }
 
