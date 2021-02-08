@@ -1,6 +1,7 @@
 import './App.css';
 //import './index.css';
 import "bulma/css/bulma.css";
+import _ from "underscore";
 import { Banner } from './Components/Banner';
 import Tools from './Components/Tools'
 import React, { Component } from "react";
@@ -12,35 +13,29 @@ import ConsoleRight from './Components/ConsoleRight';
 import NewGame from "./Controls/NewGame";
 import NewEngine from "./Controls/NewEngine";
 import Footer from './Components/Footer';
-import Message from './Components/Message';
+// import Message from './Components/Message';
 class App extends Component {
   constructor(props) {
     super(props);
     this.nGame = new NewGame();
     this.newEngine = new NewEngine();
     this.state = {
-      cellValues: new Array(81).fill("2"),
+      cellValues: new Array(81).fill(""),
       cellsBackgroundColors: new Array(81).fill("bg-white") ,
       gameLevel : null, 
       complexityLevel : null, 
       countEmptyCells : null,
       complexityLog: 1,
-      // 
       consoleMessag: "First message",
       numberOfSolved: 0,
       messageBoxBelow:":-D",
-
       stop: false,
-      stateOfGame: "active",
-      
+      stateOfGame: "initialised",
       rnum: "",
       cellsBackgroundColors: [],
       gameId: "",
-
-
       popupCells: [],
       popupCellsMessage: [],
-
       showPopup: false,
       showConnected: false
     };
@@ -53,6 +48,7 @@ class App extends Component {
 
     this.setState({ maxIteration: this.state.firstMaxIteration });
     const filledArray = new Array(81).fill("");
+    
     this.setState({ numberOfSolved: 0 });
     this.setState({ cellValues: filledArray });
 
@@ -68,6 +64,8 @@ class App extends Component {
   };
 
   getGameInfo = e => {
+    // console.log('this.state.stateOfGame', this.state.stateOfGame)
+    
     setTimeout(() => {
       if (this.state.stateOfGame === "solved") {
         console.log(
@@ -79,32 +77,47 @@ class App extends Component {
     }, 300);
 
     let info = this.newEngine.checkTheGame(this.state.cellValues);
-    if (info.complexity === 0) {
-      //  console.log( "complexity is " ,  info.complexity , " I am returning " );
-      // this.sendConsole("complexity is " +  info.complexity  + " I am returning " );
-      // this.notify("complexity is " +  info.complexity  + " I am returning " );
-      //  return false ;
-    }
-    {
-      this.sendConsole(" ");
-    }
-    console.log(info);
-
+    
     setTimeout(() => {
+    console.log("🚀 ~ file: App.js ~ line 82 ~ App ~ this.state.cellValues", this.state.cellValues)
       this.setState({ complexityLevel: info.complexity });
       this.setState({ countEmptyCells: info.emptyCount });
       this.setState({ countFilledCells: info.countFilledCells });
       this.setState({ complexityLog: info.complexityLog });
-
+      console.log('info', info)
       if (info.emptyCount === 0) {
         this.setState({ stateOfGame: "solved" });
         // here we can add extra control
         console.log("I am getting empty cells ... emptyCount", info.emptyCount);
-        // this.yayFinishedTheGame(e);
+        this.yayFinishedTheGame(e);
         return false;
       }
     }, 80);
   };
+
+  completedSuccessfulGame = () => {
+    const cellsB = new Array(81).fill("bg-coral");
+    this.setState({ cellsBackgroundColors: cellsB });
+
+    setTimeout(() => {
+      //const cellsB = new Array(81).fill("bg-coral");
+      this.setState({ cellsBackgroundColors: cellsB });
+    }, 2000);
+  };
+
+  yayFinishedTheGame = ()=>{
+    this.completedSuccessfulGame()
+
+    this.setState({stop: true});
+    this.setState({stateOfGame: "solved"});
+    setTimeout(()=>{
+      this.notify('Solved the game');
+      this.sendConsole("Solved the game!");
+      //
+      document.getElementById('messageBoxBelow').style.backgroundColor="#FFDD57";
+      this.setState({messageBoxBelow: ":=D"})
+    },1000)
+  }
 
   loadARandomGame = e => {
     // { level : "easy"  , str : ";;5asdasd sad" }
@@ -452,7 +465,11 @@ class App extends Component {
   };
 
   solveHandler = () => {
-    // console.log('Solver-started')
+
+    this.setState({stateOfGame: "active"})
+    // basecase to stop recursion
+    this.setState({maxIteration: this.state.firstMaxIteration});
+
     this.solve()
   }
   
@@ -487,10 +504,28 @@ class App extends Component {
       });
   
     })
+
+    if(foundCells.length>0 || foundCellsSecond.length>0 ){
+    } else this.setState({maxIteration: this.state.maxIteration -1});
+    // recurse basecase
+    const tryAgain = foundCells.length>0 || foundCellsSecond.length>0 || this.state.maxIteration>0 ? true:false
     
-    if(foundCells.length>0 || foundCellsSecond.length>0) {
-      setTimeout(()=>this.solve(e),500);
-    }
+    setTimeout(()=> {
+      if(!tryAgain) {
+        // maxIteration met & cannot solve board
+        if(this.state.stateOfGame ==="active" && !tryAgain){
+          // backup current state of game
+          // gameLoadedFirst is bad name... currentGameBoard may be better???
+          this.setState({gameLoadedFirst: this.state.cellValues});
+          this.setState({maxIteration: this.state.firstMaxIteration})
+          // try guessing solution
+          this.thirdAlgo();
+        }
+
+        // retry algo1 || algo2
+      } else this.solve(e)
+
+    })
 
 
     // let newcellsBackgroundColors = [...this.state.cellsBackgroundColors];
@@ -504,10 +539,72 @@ class App extends Component {
     // },  300 );
   };
 
-  stop = () => {
-    console.log("stop ");
-  };
+  thirdAlgo = () => {
+    if(this.state.stateOfGame==="solved") return;
 
+    this.setState({stateOfGame: "Guessing"})
+    // look for empty cells with only two candidates to make guess of
+    let guess1 = this.newEngine.thirdAlgo(this.state.cellValues);
+
+    if(guess1===null) {
+      console.log('WARNING - cannot do anything')
+    } else {
+      // 
+      if(this.tryGuess(guess1)===false) {
+        this.goBackSafe()
+        this.solve();
+      }
+    }
+  }
+
+  tryGuess = (guess) => {
+    // sometimes there is more than one cell with two potential candidates. pick a random one
+    let handed = _.sample(guess);
+    if(handed===null || !handed)  {
+      this.goBackSafe();
+      setTimeout(()=>{
+        this.solve();
+      },300)
+
+      return false;
+    } else {
+      // 
+      if(this.tryA(handed, _.sample(handed.cands))===false) {
+        return false
+      }
+    }
+  }
+
+  tryA = (hand, value)=>{
+    console.log('Try Guessing')
+    this.setState({maxIteration: 2});
+    // not implmented
+    // if(this.newEngine.checkIfCellsProper(this.state.cellValues)===false) return false;
+    if(this.getGameInfo()===false || this.state.stop===true) return false;
+    let id = hand.row.toString()+hand.column.toString();
+    this.changeCellValueById(id, value);
+    if(this.solve()===false) return false;
+  }
+
+  // return to previous state
+  goBackSafe = ()=>{
+    //
+    this.setState({ maxIteration: this.state.firstMaxIteration })
+    //
+    // gameLoadedFirst is bad name. to have name changed to storedGameState.
+    this.setState({ cellValues: [...this.state.gameLoadedFirst] })
+  }
+
+  stop = () => {
+    this.setState({
+      stop: !this.state.stop
+    });
+    if(this.state.stop===false) {
+      setTimeout(()=>{
+        this.solve();
+      }, 500);
+    }
+  };
   newGame=()=>{ 
     console.log("newGame" );
     this.loadAnewGame();
@@ -572,11 +669,10 @@ class App extends Component {
     this.setState({ stateOfGame: "active" });
 
     this.colorFirst();
-
     setTimeout(() => {
       this.gameInit();
-      this.loadARandomGame();
-      this.getGameInfo();
+      // this.loadARandomGame();
+      // this.getGameInfo();
     }, 300);
   }
 
@@ -603,28 +699,27 @@ class App extends Component {
                 toggleConnected={this.toggleConnected}
                 showConnected={this.showConnected}
               />
-                
             </div>
 
             <div className="container">
-
               <div className="columns">
-
                 <div className="column">
                   <Board
-                  handleChange={this.handleChange}
-                  handleFocus={this.handleFocus}
-                  cellValues={this.state.cellValues}
-                  cellsBackgroundColors={this.state.cellsBackgroundColors}
-                  popupCells={this.state.popupCells}
-                  popupCellsMessage={this.state.popupCellsMessage}
+                    handleChange={this.handleChange}
+                    handleFocus={this.handleFocus}
+                    cellValues={this.state.cellValues}
+                    cellsBackgroundColors={this.state.cellsBackgroundColors}
+                    popupCells={this.state.popupCells}
+                    popupCellsMessage={this.state.popupCellsMessage}
                   />
                 </div>              
                 <div className="column">  
                   <GameInfo
+                    stateOfGame={this.state.stateOfGame}
                     gameId={this.state.gameId}
                     gameLevel={this.state.gameLevel}
                     complexityLevel={this.state.complexityLevel}
+                    countFilledCells={this.state.countFilledCells}
                     countEmptyCells={this.state.countEmptyCells}
                     complexityLog={this.state.complexityLog}
                   /> 
@@ -633,7 +728,6 @@ class App extends Component {
                   <div className="columns">
                     <div className="row">
                       <div className="column">
-
                         <ConsoleRight
                           consoleMessage={this.state.consoleMessage}
                           numberOfSolved={this.state.numberOfSolved}

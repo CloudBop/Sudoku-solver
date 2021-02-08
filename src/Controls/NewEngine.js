@@ -219,7 +219,6 @@ class newE {
         countFilledCells++;
       } else {
         emptyCount++;
-
         let cands = this.whichValuesByRowColumnCube(
           cellValues,
           elem.row,
@@ -228,7 +227,6 @@ class newE {
         );
         // console.log("cands", cands);
         elem.cands = [...cands];
-
         complexity = complexity * cands.length;
       }
     });
@@ -336,10 +334,33 @@ class newE {
         }
       }
     })
-    
-    
     return [ ...foundCellsObjArr];
+  }
+  thirdAlgo(cellValues) {
+    let gameInfo = this.checkTheGame(cellValues)
+    let allCellsWithCandidates = gameInfo.cells;
+    let foundCells=[]
 
+    allCellsWithCandidates.map(elem=> {
+      // does cell have two candidates ? 
+      if(elem.cands!==undefined && elem.cands.length===2){
+        foundCells.push(elem)
+      }
+    })
+
+    // return all cells with any number of candidates
+    if(foundCells.length===0) {
+      // console.log('Could not find cell with two potential candidates');
+      allCellsWithCandidates.map(elem=> {
+        if(elem.cands!==undefined && elem.cands.length>0) {
+          foundCells.push(elem)
+        }
+      })
+    }
+    return foundCells;
+  }
+  checkIfCellsProper(){
+    return new Error("Not implemented.");
   }
 }
 
