@@ -4,6 +4,7 @@ import "bulma/css/bulma.css";
 import _ from "underscore";
 import { Banner } from './Components/Banner';
 import Tools from './Components/Tools'
+import SecondaryTools from './Components/SecondaryTools'
 import React, { Component } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -17,8 +18,11 @@ import Footer from './Components/Footer';
 class App extends Component {
   constructor(props) {
     super(props);
+    // collection of games to read
     this.nGame = new NewGame();
+    // solver
     this.newEngine = new NewEngine();
+    //
     this.state = {
       cellValues: new Array(81).fill(""),
       cellsBackgroundColors: new Array(81).fill("bg-white") ,
@@ -40,7 +44,19 @@ class App extends Component {
       showConnected: false
     };
   }
-
+  componentDidMount() {
+    console.log("componentDidMount ");
+    
+    this.colorFirst();
+    setTimeout(() => {
+      // initital basecase of state to manage
+      this.gameInit();
+      // load up game state
+      this.loadARandomGame();
+      // derive specs
+      this.getGameInfo();
+    }, 300);
+  }
   gameInit = e => {
     // console.log("game init...");
     this.setState({ stop: false });
@@ -360,14 +376,11 @@ class App extends Component {
 
 
   colorConnectedCells = (id, color) => {
-    
     if (this.state.showConnected === false) {
       this.resetNotify();
       return;
     }
-
     // let index = this.newEngine.convertIdToIndex(id);
-
     //it creates default colors white again
     let colorCells = new Array(81).fill("bg-white"); //  [...this.state.cellsBackgroundColors];
     //
@@ -445,7 +458,11 @@ class App extends Component {
     let newArr = gameObj.str.split(";");
     // don't need last element
     newArr.pop();
-    this.setState({ cellValues: [ ...newArr ] , gameLevel : level  });
+    this.setState({ 
+      cellValues: [ ...newArr ], 
+      gameLevel : level,
+      gameId: gameObj.id
+    });
     this.resetColors();
     // it will get a string value from Engine.js game String
     //  var str = "5,,,1,,8,,,9,,,,6,,,,,2,,,2,,5,,,,6";
@@ -485,7 +502,6 @@ class App extends Component {
     
     // algo2, loop through cell area, column, row, square, and look for a single candidate version.
     let foundCellsSecond = this.newEngine.secondSolve(this.state.cellValues)
-    console.log("🚀 ~ file: App.js ~ line 461 ~ App ~ foundCells", foundCellsSecond)
 
     foundCellsSecond.map(found => {
       let id = found.detail.row.toString() + found.detail.column.toString();
@@ -501,7 +517,7 @@ class App extends Component {
     } else this.setState({maxIteration: this.state.maxIteration -1});
     // recurse basecase
     const tryAgain = foundCells.length>0 || foundCellsSecond.length>0 || this.state.maxIteration>0 ? true:false
-    
+    console.log('tryAgain', tryAgain)
     setTimeout(()=> {
       if(!tryAgain) {
         // maxIteration met & cannot solve board
@@ -532,12 +548,14 @@ class App extends Component {
   };
 
   thirdAlgo = () => {
+    console.log('object',this.state.stateOfGame);
     if(this.state.stateOfGame==="solved") return;
 
     this.setState({stateOfGame: "Guessing"})
     // look for empty cells with only two candidates to make guess of
     let guess1 = this.newEngine.thirdAlgo(this.state.cellValues);
 
+    console.log('guess1', guess1)
     if(guess1===null) {
       console.log('WARNING - cannot do anything')
     } else {
@@ -655,23 +673,7 @@ class App extends Component {
     this.setState({ consoleMessage: str });
   };
 
-  componentDidMount() {
-    console.log("componentDidMount ");
-    
-    this.colorFirst();
-    setTimeout(() => {
-      // initital basecase of state to manage
-      this.gameInit();
-      // load up game state and derive specs
-      this.loadARandomGame();
-      //
-      this.getGameInfo();
-    }, 300);
-  }
-
   render() {
-
-
     return (
       <div className={"container"}>
         <ToastContainer autoClose={7000} />
@@ -680,13 +682,18 @@ class App extends Component {
             <Banner />
 
             <div className="container">
-              <Tools 
+              <SecondaryTools
                 getThisAsStr={this.getThisAsStr}
+                newGame={this.newGame}
+                deleteGame={this.deleteGame}
+              />
+            </div>
+            <div className="container" style={{marginTop:"0.8rem"}}>
+              <Tools 
+                
                 stop={this.stop}
                 goBackT={this.goBackT}
                 solve={this.solveHandler}
-                newGame={this.newGame}
-                deleteGame={this.deleteGame}
                 togglePopup={this.togglePopup}
                 showPopup={this.showPopup}
                 toggleConnected={this.toggleConnected}

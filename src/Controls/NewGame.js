@@ -1,9 +1,9 @@
 import _ from "lodash" ; 
 //
 class NewGame{
-    constructor(){
-      console.log("new Game was created ");
-    }
+    // constructor(){
+    //   console.log("new Game was created ");
+    // }
     getFirstValue() {
         var stArr = [];  
         var st;
